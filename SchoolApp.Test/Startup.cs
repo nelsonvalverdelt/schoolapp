@@ -57,7 +57,8 @@ namespace SchoolApp.Test
                 endpoints.MapToVueCliProxy(
                     "{*path}",
                     new SpaOptions { SourcePath = "ClientApp" },
-                    npmScript: (System.Diagnostics.Debugger.IsAttached) ? "serve" : null,
+                    //npmScript: (System.Diagnostics.Debugger.IsAttached) ? "serve" : null, // vuejs
+                    npmScript: (System.Diagnostics.Debugger.IsAttached) ? "dev" : null, //nuxt
                     regex: "Compiled successfully",
                     forceKill: true
                     );

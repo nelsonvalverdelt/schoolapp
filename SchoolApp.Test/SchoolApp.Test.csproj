@@ -5,10 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="ClientApp\node_modules\**" />
-    <Content Remove="ClientApp\node_modules\**" />
-    <EmbeddedResource Remove="ClientApp\node_modules\**" />
-    <None Remove="ClientApp\node_modules\**" />
+    <Compile Remove="Backup\**" />
+    <Content Remove="Backup\**" />
+    <EmbeddedResource Remove="Backup\**" />
+    <None Remove="Backup\**" />
   </ItemGroup>
 
   <ItemGroup>

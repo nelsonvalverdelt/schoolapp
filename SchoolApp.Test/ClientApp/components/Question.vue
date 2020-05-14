@@ -1,20 +1,20 @@
-﻿<template>
+<template>
     <div class="question-content">
         <div class="btn-add btn-rotate-180 question-btn-right-top" @click="add" v-show="data.btnAdd.isShow"></div>
-        <div class="btn-remove btn-rotate-360 question-btn-right-bottom" @click="remove" v-show="data.btnRemove.isShow"></div>
+        <div class="btn-remove btn-rotate-360 question-btn-right-bottom" @click="remove(data.id)" v-show="data.btnRemove.isShow"></div>
         <div class="question-detail">
             <b-form-group label="Tipo de Pregunta:" class="mr-5">
-                <b-form-radio-group v-model="data.questionType" class="mt-2">
+                <b-form-radio-group v-model="questionType" class="mt-2">
                     <b-form-radio value="1">Pregunta Abierta</b-form-radio>
                     <b-form-radio value="2">Pregunta Cerrada</b-form-radio>
                     <b-form-radio value="3">Opción múltiple</b-form-radio>
                 </b-form-radio-group>
             </b-form-group>
             <b-form-group label="Tiempo (min):" label-for="time" class="mr-5">
-                <b-form-spinbutton v-model="data.time" id="time" min="1" max="120"></b-form-spinbutton>
+                <b-form-spinbutton v-model="time" id="time" min="1" max="120"></b-form-spinbutton>
             </b-form-group>
             <b-form-group label="Puntos:" label-for="points">
-                <b-form-spinbutton v-model="data.points" id="points" min="1" max="120"></b-form-spinbutton>
+                <b-form-spinbutton v-model="points" id="points" min="1" max="120"></b-form-spinbutton>
             </b-form-group>
         </div>
         <div class="question">
@@ -23,18 +23,18 @@
             </b-form-group>
         </div>
         <div class="options">
-            <div v-if="data.questionType != 1">
+            <div v-if="questionType != 1">
                 <b-form-group :label="labelOpciones" label-for="question">
                     <b-form-radio-group name="radio-sub-component" class="options-group scroll-x scroll-h-style-1">
                         <component
                             name="radio"
                             is="option-simple" 
                             v-for="item in options"
-                            :options="options"
+                            :parent="data"
                             :data="item"
                             :key="item.id"
-                            :type=data.questionType
-                            :isEdit= data.isOptionEdit>
+                            :type=questionType
+                            :isEdit=1>
                         </component>
                     </b-form-radio-group>
                 </b-form-group>
@@ -43,88 +43,63 @@
     </div>
 </template>
 <script>
-    import OptionSimple from '@/components/addons/options/OptionSimple.vue';
-    import { mapState } from 'vuex';
-    export default {
-        props: ['data'],
-        computed: {
-            labelOpciones() {
-                return  `Opciones (${this.data.options.length})`;
-            },
-            ...mapState(['Questions'])
-        },
-        data() {
-            return {
-                options: this.data.options
-            }
-        },
-        methods: {
-            add: function () {
-                this.data.btnAdd.isShow = false;
-                this.data.btnRemove.isShow = true;
-                let id = this.getId();
-                let data = {
-                    id: id,
-                    isOptionEdit: true,
-                    questionType: 1,
-                    time: 1,
-                    points: 1,
-                    btnAdd: {
-                        isShow: true
-                    },
-                    btnRemove: {
-                        isShow: true
-                    },
-                    options: [
-                        {
-                            value: '',
-                            title: '',
-                            btnAdd: {
-                                isShow: true
-                            },
-                            btnRemove: {
-                                isShow: false
-                            }
-                        }
-                    ]
-                }
-                this.Questions.push(data);
-            },
-            remove: function () {
-                this.validateLastQuestion();
-                let index = this.Questions.findIndex(x => x.id === this.data.id);
-                if (index > -1) this.Questions.splice(index, 1);
-                this.validateFirstQuestion();
-            },
-            validateFirstQuestion: function () {
-                if (this.Questions.length === 1) {
-                    let question = this.Questions[0];
-                    question.btnAdd.isShow = true;
-                    question.btnRemove.isShow = false;
-                }
-            },
-            validateLastQuestion: function () {
-                let currentLength = this.Questions.length;
-                let beforeLength = this.Questions.length - 1;
-                if (currentLength >= 2) {
-                    let question = this.Questions[currentLength - 1].id
-                    if (question === this.data.id) {
-                        question = this.Questions[beforeLength - 1];
-                        question.btnRemove.isShow = true;
-                        question.btnAdd.isShow = true;
-                    }
-                }
-            },
-            getId: function () {
-              return 'question_' + Math.random().toString(36).substr(2, 9);
-            },
-        },
-        components: {
-            OptionSimple
-        }
+  import OptionSimple from '@/components/options/OptionSimple.vue';
+  import { mapState, mapActions, mapMutations } from 'vuex';
+  export default {
+    props: ['data'],
+    data() {
+      return {
+        options: this.data.options,
+        questionType: 1,
+        time: 1,
+        points: 0
+      }
+    },     
+    computed: {
+        labelOpciones() {
+            return  `Opciones (${this.data.options.length})`;
+      },
+      ...mapState({
+          questions: state => state.test.Questions
+      })
+    },
+    watch: {
+      questionType(value) {
+        let id = this.data.id;
+        this.updateQuestionTimeMut({ id, value });
+      },
+      time(value) {
+        let id = this.data.id;
+        this.updateQuestionTimeMut({ id, value });
+      },
+      points(value) {
+        let id = this.data.id;
+        this.updateQuestionPointsMut({ id, value });
+      }
+    },
+    methods: {
+      add() {
+        this.addAct();
+      },
+      remove(id) {
+        this.removeAct(id);
+      },
+      ...mapActions({
+          addAct: 'test/addQuestion',
+          removeAct: 'test/removeQuestion'
+      }),
+      ...mapMutations({
+        updateQuestionTypeMut: 'test/updateQuestionType',
+        updateQuestionTimeMut: 'test/updateQuestionTime',
+        updateQuestionPointsMut: 'test/updateQuestionPoints'
+      })
+    },
+      components: {
+          OptionSimple
+      }
     }
 </script>
-<style lang="scss" scoped>
+<style>
      .question-btn-right-top{
         position:absolute;
         top: -1.35rem;
@@ -143,7 +118,7 @@
         border-color: #fff;
         border-width: 2.5px;
         border-style: solid;
-        background-image: url(../assets/icons/plus.png);
+        background-image: url(~assets/icons/plus.png);
         background-position-x:center;
         background-position-y: center;
         background-repeat: no-repeat;
@@ -158,7 +133,7 @@
         border-color: #fff;
         border-width: 2.5px;
         border-style: solid;
-        background-image: url(../assets/icons/delete-small-white.png);
+        background-image: url(~assets/icons/delete-small-white.png);
         background-position-x:center;
         background-position-y: center;
         background-repeat: no-repeat;

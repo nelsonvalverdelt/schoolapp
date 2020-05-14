@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <b-avatar button size="2em" :variant="bgColor(index)" :text="iconText" v-b-tooltip.hove :title="fullName"></b-avatar>
 </template>
 <script>
@@ -13,7 +13,9 @@
             fullName() {
                 return this.data.Names + ' ' + this.data.LastName
             },
-            ...mapState(['variants'])
+          ...mapState({
+              variants: state => state.test.variants
+          })
         },
         methods: {
             bgColor(index) {

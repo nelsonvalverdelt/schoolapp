@@ -1,8 +1,8 @@
-﻿<template>
+<template>
     <div class="box-option" style="min-width:18rem">
         <div class="btn-options">
-            <div class="btn-option-remove btn-rotate-360" @click="remove" v-show="data.btnRemove.isShow"></div>
-            <div class="btn-option-add btn-rotate-180" @click="add" v-show="data.btnAdd.isShow"></div>
+            <div class="btn-option-remove btn-rotate-360" @click="remove(data.id, parent.id)" v-show="data.btnRemove.isShow"></div>
+            <div class="btn-option-add btn-rotate-180" @click="add(parent.id)" v-show="data.btnAdd.isShow"></div>
         </div>
         <div v-if="type == 2">
             <b-form-radio>
@@ -27,55 +27,20 @@
     </div>
 </template>
 <script>
+    import { mapActions } from 'vuex';
     export default {
-        props: ['data', 'options', 'isEdit','type'],
-        methods: {
-            add: function () {
-                this.data.btnAdd.isShow = false;
-                this.data.btnRemove.isShow = true;
-                let id = this.getId();
-                let data =
-                {
-                    id: id,
-                    value: '',
-                    title: '',
-                    btnAdd: {
-                        isShow: true
-                    },
-                    btnRemove: {
-                        isShow: true
-                    }
-                };
-                this.options.push(data);
-            },
-            remove: function () {
-                this.validateLastOption();
-                let index = this.options.findIndex(x => x.id === this.data.id);
-                if (index > -1) this.options.splice(index, 1);
-                this.validateFirstOption();
-            },
-            validateFirstOption: function () {
-                if (this.options.length === 1) {
-                    let option = this.options[0];
-                    option.btnAdd.isShow = true;
-                    option.btnRemove.isShow = false;
-                }
-            },
-            validateLastOption: function () {
-                let currentLength = this.options.length;
-                let beforeLength = this.options.length - 1;
-                if (currentLength >= 2) {
-                    let option = this.options[currentLength - 1].id
-                    if (option === this.data.id) {
-                        option = this.options[beforeLength - 1];
-                        option.btnRemove.isShow = true;
-                        option.btnAdd.isShow = true;
-                    }
-                }
-            },
-            getId: function () {
-                return 'option_' + Math.random().toString(36).substr(2, 9);
-            },
+      props: ['parent','data', 'isEdit','type'],
+      methods: {
+         remove(id, questionId) {
+            this.removeOptionMut({ id, questionId });
+          },
+          add(id) {
+              this.addOptionMut(id);
+          },
+          ...mapActions({
+              addOptionMut: 'test/addOption',
+              removeOptionMut: 'test/removeOption'
+          })
         }
     }
 </script>
@@ -108,7 +73,7 @@
             border-color: #fff;
             border-width: 2.5px;
             border-style: solid;
-            background-image: url(../../../assets/icons/plus.png);
+            background-image: url(~assets/icons/plus.png);
             background-position-x: center;
             background-position-y: center;
             background-repeat: no-repeat;
@@ -125,7 +90,7 @@
             border-color: #fff;
             border-width: 2.5px;
             border-style: solid;
-            background-image: url(../../../assets/icons/delete-small-white.png);
+            background-image: url(~assets/icons/delete-small-white.png);
             background-position-x: center;
             background-position-y: center;
             background-repeat: no-repeat;
