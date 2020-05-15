@@ -52,7 +52,7 @@
         options: this.data.options,
         questionType: 1,
         time: 1,
-        points: 0
+        points: 1
       }
     },     
     computed: {

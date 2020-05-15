@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <div class="switch-simple">
         <input type="checkbox"
                id="switch-simple"
@@ -9,7 +9,6 @@
     </div>
 </template>
 <script>
-
     export default {
         props: {
             value: {
