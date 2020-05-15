@@ -52,8 +52,8 @@
         <b-avatar button icon="person-plus-fill" size="3.5em" class="float-button" variant="primary" v-b-modal.modal-user-register></b-avatar>
 
         <!--Bootstrap User List-->
-        <b-modal id="modal-user-search" centered title="Invitados" cancel-title="Cerrar" ok-title="Aceptar">
-          <div v-if="guests.length > 0">
+        <b-modal id="modal-user-search" size="lg" centered title="Invitados" cancel-title="Cerrar" ok-title="Aceptar">
+          <div v-if="guests.length > 0" id="guest-vertical">
             <component is="guest-vertical"
                        v-for="(item, index) in guests"
                        :data="item"
@@ -66,13 +66,14 @@
           </b-form-text>
         </b-modal>
         <!--Bootstrap User Register-->
-        <b-modal id="modal-user-register" centered :title="titleUserRegister" cancel-title="Cerrar" ok-title="Aceptar">
+        <b-modal id="modal-user-register" size="lg" centered :title="titleUserRegister" cancel-title="Cerrar" ok-title="Aceptar">
           <b-form-tags no-outer-focus class="mb-2 border-0">
             <template v-slot="{ tags, inputAttrs, inputHandlers, tagVariant, addTag, removeTag }">
               <b-input-group class="mb-2">
                 <b-form-input v-bind="inputAttrs"
                               v-model="guestEmail"
                               v-on="inputHandlers"
+                              :formatter= "formatEmail"
                               placeholder="usuario@correo.com"
                               class="form-control">
                 </b-form-input>
@@ -81,9 +82,6 @@
                 </b-input-group-append>
                 <b-form-invalid-feedback :state="state">
                   Ya existe un invitado con este correo
-                </b-form-invalid-feedback>
-                <b-form-invalid-feedback :state="inputEmail">
-                  Formato de email incorrecto
                 </b-form-invalid-feedback>
               </b-input-group>
               <div v-if="guests.length > 0" id="guest-vertical">
@@ -149,13 +147,8 @@
         // Return false (invalid) if new tag is a duplicate
         return this.guestEmails.indexOf(this.guestEmail.trim()) > -1 ? false : null
       },
-      inputEmail() {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.guestEmail) || this.guestEmail.length === 0)
-          return true
-        else return false;
-      },
       disableBtnAdd() {
-        if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(this.guestEmail) && this.guestEmails.indexOf(this.guestEmail.trim()) === -1)
+        if (this.guestEmails.indexOf(this.guestEmail.trim()) === -1 && this.guestEmail.length > 0)
           return false
         else return true;
       },
@@ -173,6 +166,9 @@
         this.addGuestAction(this.guestEmail);
         this.guestEmail = "";
       },
+       formatEmail(value){
+         return String(value).substring(0,60);
+      },
       ...mapActions({
           addGuestAction: 'test/addGuest'
       })
@@ -186,7 +182,7 @@
   }
 </script>
 
-<style>
+<style scoped>
   .home {
     margin-top: 1rem;
   }
@@ -198,7 +194,6 @@
   .scroll-y {
     overflow-y: auto;
     padding: 0 1.5rem;
-    /*max-height: 85vh;*/
   }
 
   .dashed {
@@ -285,24 +280,25 @@
         Esto evita buscar hijo por hijo desde #modal-user-search hasta el último hijo del modal
         Modal: modal-user-search
     */
-  #modal-user-search div[class="modal-body"] {
+  #modal-user-search div[id="guest-vertical"] {
     max-height: 75vh;
     overflow-y: auto;
   }
 
-    #modal-user-search div[class="modal-body"]::-webkit-scrollbar-track {
+    #modal-user-search div[id="guest-vertical"]::-webkit-scrollbar-track {
       -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
       -moz-box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
       background-color: #F5F5F5;
       border-radius: 10px;
     }
 
-    #modal-user-search div[class="modal-body"]::-webkit-scrollbar {
+    #modal-user-search div[id="guest-vertical"]::-webkit-scrollbar {
       width: 10px;
+      height: 10px;
       background-color: #F5F5F5;
     }
 
-    #modal-user-search div[class="modal-body"]::-webkit-scrollbar-thumb {
+    #modal-user-search div[id="guest-vertical"]::-webkit-scrollbar-thumb {
       border-radius: 10px;
       background-color: #FFF;
       background-image: -webkit-gradient(linear, 40% 0%, 75% 84%, from(#DEDEDE), to(#DEDEDE), color-stop(.9,#DEDEDE))
@@ -330,6 +326,7 @@
 
     #modal-user-register div[id="guest-vertical"]::-webkit-scrollbar {
       width: 10px;
+      height: 10px;
       background-color: #F5F5F5;
     }
 
